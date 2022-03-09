@@ -56,8 +56,9 @@ module USPS
     private
 
     def server(_request)
-      dll = testing? ? "ShippingAPITest.dll" : "ShippingAPI.dll"
-      "https://production.shippingapis.com/#{dll}"
+      # dll = testing? ? "ShippingAPITest.dll" : "ShippingAPI.dll"
+      # "https://production.shippingapis.com/#{dll}"
+      testing? ? "https://secure.shippingapis.com/shippingapi.dll" : "https://production.shippingapis.com/shippingapi.dll"
     end
   end
 end
