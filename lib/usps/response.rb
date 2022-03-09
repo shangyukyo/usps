@@ -6,4 +6,5 @@ module USPS::Response
   autoload :TrackingLookup,         'usps/response/tracking_lookup'
   autoload :TrackingFieldLookup,    'usps/response/tracking_field_lookup'
   autoload :Rate,    'usps/response/rate'
+  autoload :InternationalRate,    'usps/response/international_rate'
 end
