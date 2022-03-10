@@ -1,7 +1,9 @@
 module USPS::Request
   # TODO: #send! could be made smarter to send lookup batches
   class InternationalRate < Base
-    attr_reader :service, :first_class_mail_type, :zip_origination, :zip_destination, :pounds, :ounces, :container, :width, :length, :height, :girth, :machinable
+    attr_reader :zip_origination, :zip_destination, :country,
+      :pounds, :ounces, :container, :width, :length, :height, :girth, :machinable,
+      :mail_type, :value_of_contents, :acceptance_datetime
 
     config(
       :api => 'IntlRateV2',
@@ -9,13 +11,18 @@ module USPS::Request
       :response => USPS::Response::InternationalRate
     )
 
+    #TODO class id
+    CLASSID_MAIL_SERVICES = {
+      '1' => 'Priority Mail Express International',
+      '2' => 'Priority Mail International',
+      '15'  => 'First-Class Package International Service'
+    }
     #TODO international rate
     
     def initialize(opts={})
-      @service = opts[:service]
-      @first_class_mail_type = opts[:first_class_mail_type]          
       @zip_origination = opts[:zip_origination]
       @zip_destination = opts[:zip_destination]
+      @country = opts[:country]
       @pounds = opts[:pounds]
       @ounces = opts[:ounces]
       @container = opts[:container]
@@ -23,12 +30,10 @@ module USPS::Request
       @length = opts[:length]
       @height = opts[:height]
       @girth = opts[:girth]
-      if opts[:service] =~ /First/
-        @machinable = true
-      else
-        @machinable = false
-      end
-        
+      @machinable = false  
+      @mail_type = opts[:mail_type]      
+      @value_of_contents = opts[:value_of_contents]
+      @acceptance_datetime = opts[:acceptance_datetime]
     end
 
     def response_for(xml)
@@ -38,33 +43,27 @@ module USPS::Request
     def build
       super do |builder|
         builder.tag!('Revision', 2)
-        builder.tag!('Package', :ID => 'IST') do 
-          builder.tag!('Service', @service)
-          builder.tag!('FirstClassMailType', @first_class_mail_type)          
-          builder.tag!('ZipOrigination', @zip_origination)
-          builder.tag!('ZipDestination', @zip_destination)
+        builder.tag!('Package', :ID => 'IST') do           
+                         
           builder.tag!('Pounds', @pounds)
           builder.tag!('Ounces', @ounces)
+          builder.tag!('Machinable', @machinable)
+          builder.tag!('MailType', @mail_type)               
+          builder.tag!('ValueOfContents', @value_of_contents)
+          builder.tag!('Country', @country)
           builder.tag!('Container', @container)
           builder.tag!('Width', @width)
           builder.tag!('Length', @length)
           builder.tag!('Height', @height)
           builder.tag!('Girth', @girth)
-
-          if @signature_option.present?
-            builder.tag!('SpecialServices') do 
-              build_signature_option_service(builder)
-            end          
-          end
-
-          builder.tag!('Machinable', @machinable)
+          builder.tag!('OriginZip', @zip_origination)
+          builder.tag!('CommercialFlag', 'Y')
+          builder.tag!('AcceptanceDateTime', @acceptance_datetime)
+          builder.tag!('DestinationPostalCode', @zip_destination)                                        
         end
       end
     end
 
-    def build_signature_option_service(builder)
-      builder.tag!('SpecialService', '119')
-    end
   end
 
 end

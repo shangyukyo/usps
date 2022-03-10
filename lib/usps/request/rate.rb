@@ -1,7 +1,8 @@
 module USPS::Request
   # TODO: #send! could be made smarter to send lookup batches
   class Rate < Base
-    attr_reader :service, :first_class_mail_type, :zip_origination, :zip_destination, :pounds, :ounces, :container, :width, :length, :height, :girth, :machinable
+    attr_reader :service, :first_class_mail_type, :zip_origination, :zip_destination, 
+      :pounds, :ounces, :container, :width, :length, :height, :girth, :machinable
 
     config(
       :api => 'RateV4',
@@ -15,13 +16,14 @@ module USPS::Request
       @first_class_mail_type = opts[:first_class_mail_type]          
       @zip_origination = opts[:zip_origination]
       @zip_destination = opts[:zip_destination]
-      @pounds = opts[:pounds]
+      @pounds = 0
       @ounces = opts[:ounces]
       @container = opts[:container]
       @width = opts[:width]
       @length = opts[:length]
       @height = opts[:height]
       @girth = opts[:girth]
+      @signature_option = opts[:signature_option]
       if opts[:service] =~ /First/
         @machinable = true
       else
@@ -62,7 +64,7 @@ module USPS::Request
     end
 
     def build_signature_option_service(builder)
-      builder.tag!('SpecialService', '119')
+      builder.tag!('SpecialService', '108')
     end
   end
 
